@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LCL Emprunt">
+<title>LCL — Capacité d'emprunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bleu:       #003189;
+  --bleu-dark:  #001f5c;
+  --jaune:      #FFD500;
+  --bg:         #F0F2F7;
+  --card:       #FFFFFF;
+  --border:     #DDE1EA;
+  --muted:      #5C677A;
+  --hint:       #9AA3B2;
+  --text:       #0D1B36;
+  --r:          14px;
+  --rs:         10px;
+  --safe-top:   env(safe-area-inset-top, 0px);
+  --safe-bot:   env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Source Sans 3', -apple-system, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; font-size: 15px;
+}
+
+/* ── HEADER ── */
+.hd {
+  background: var(--bleu);
+  padding: calc(var(--safe-top) + 14px) 18px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.hd-title { font-size: 17px; font-weight: 900; color: #fff; letter-spacing: .2px; }
+.hd-sub   { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 1px; font-weight: 400; }
+.badge {
+  font-size: 11px; font-weight: 700;
+  padding: 5px 12px;
+  background: rgba(255,213,0,.15);
+  color: var(--jaune);
+  border: 1px solid rgba(255,213,0,.3);
+  border-radius: 20px;
+}
+
+/* ── MODE TOGGLE ── */
+.mode-wrap { padding: 14px 16px 6px; }
+.mode-toggle {
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rs); overflow: hidden;
+}
+.mode-btn {
+  padding: 11px; font-size: 14px; font-weight: 700;
+  text-align: center; cursor: pointer;
+  border: none; background: transparent;
+  color: var(--muted); transition: background .2s, color .2s;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.mode-btn.active { background: var(--bleu); color: var(--jaune); }
+
+/* ── SECTIONS / CARDS ── */
+.sec { padding: 8px 16px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px; display: flex; flex-direction: column; gap: 14px;
+}
+.sec-label {
+  font-size: 10px; font-weight: 900;
+  color: var(--bleu); text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.divider { height: 1px; background: var(--border); }
+
+/* ── FIELDS ── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.hint { font-size: 11px; color: var(--hint); font-style: italic; margin-top: 2px; }
+
+.iw { position: relative; display: flex; align-items: center; }
+.iw input {
+  width: 100%; padding: 11px 64px 11px 13px;
+  font-size: 16px; font-weight: 700;
+  font-family: 'Source Sans 3', sans-serif;
+  border: 1.5px solid var(--border);
+  border-radius: var(--rs);
+  background: var(--bg); color: var(--text);
+  outline: none; -webkit-appearance: none;
+  transition: border-color .2s, background .2s;
+}
+.iw input:focus { border-color: var(--bleu); background: #fff; }
+.iw .unit {
+  position: absolute; right: 11px;
+  font-size: 11px; font-weight: 700;
+  color: var(--hint); pointer-events: none;
+  white-space: nowrap;
+}
+
+.sw select {
+  width: 100%; padding: 11px 38px 11px 13px;
+  font-size: 15px; font-weight: 700;
+  font-family: 'Source Sans 3', sans-serif;
+  border: 1.5px solid var(--border); border-radius: var(--rs);
+  background: var(--bg); color: var(--text);
+  outline: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C677A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+}
+
+/* ── SLIDERS ── */
+.sl-row { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.sl-row input[type=range] {
+  flex: 1; height: 4px; -webkit-appearance: none;
+  background: var(--border); border-radius: 2px; outline: none;
+}
+.sl-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px; height: 24px;
+  background: var(--bleu); border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,49,137,.25);
+  cursor: pointer;
+}
+.sl-val { font-size: 14px; font-weight: 900; color: var(--bleu); min-width: 50px; text-align: right; }
+
+/* ── TOGGLE ── */
+.tog-row { display: flex; align-items: center; justify-content: space-between; }
+.tog-lbl { font-size: 13px; font-weight: 600; color: var(--muted); }
+.tog {
+  width: 46px; height: 28px; background: var(--border);
+  border-radius: 14px; position: relative; cursor: pointer;
+  transition: background .25s; flex-shrink: 0;
+}
+.tog.on { background: var(--bleu); }
+.tog::after {
+  content: ''; width: 22px; height: 22px; background: #fff;
+  border-radius: 50%; position: absolute; top: 3px; left: 3px;
+  transition: left .25s; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.tog.on::after { left: 21px; }
+
+/* ── CTA ── */
+.cta { padding: 10px 16px; }
+.btn-calc {
+  width: 100%; padding: 15px;
+  background: var(--bleu); color: var(--jaune);
+  font-size: 16px; font-weight: 900;
+  font-family: 'Source Sans 3', sans-serif;
+  border: none; border-radius: var(--r); cursor: pointer;
+  letter-spacing: .3px;
+  transition: transform .15s, background .15s;
+  -webkit-appearance: none;
+}
+.btn-calc:active { transform: scale(.97); background: var(--bleu-dark); }
+
+/* ── RESULTS ── */
+.res { display: flex; flex-direction: column; gap: 10px; padding: 0 16px; }
+
+.hero {
+  background: var(--bleu);
+  border-radius: var(--r); padding: 22px 20px; text-align: center;
+}
+.hero-lbl { font-size: 10px; font-weight: 900; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .9px; margin-bottom: 6px; }
+.hero-val { font-size: 36px; font-weight: 900; color: var(--jaune); letter-spacing: -1.5px; line-height: 1; }
+.hero-prix { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.75); margin-top: 8px; }
+.hero-sub  { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 4px; }
+
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--rs); padding: 13px 14px;
+}
+.kpi-lbl { font-size: 10px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
+.kpi-val { font-size: 17px; font-weight: 900; color: var(--text); }
+.kpi-sub { font-size: 10px; color: var(--hint); margin-top: 3px; }
+
+.bk {
+  background: #EDF1FA; border: 1px solid #BFC9E0;
+  border-radius: var(--rs); padding: 12px 14px;
+}
+.bk-title { font-size: 10px; font-weight: 900; color: var(--bleu); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+.bk-line { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+.bk-line span:first-child { color: var(--muted); }
+.bk-line span:last-child { font-weight: 700; color: var(--text); }
+.bk-line.tot { border-top: 1px solid #BFC9E0; margin-top: 5px; padding-top: 7px; }
+.bk-line.tot span { font-weight: 900; color: var(--bleu); font-size: 13px; }
+
+.tableau {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+}
+.t-head {
+  display: grid; grid-template-columns: 58px 1fr 1fr 1fr;
+  background: var(--bleu); padding: 10px 14px; gap: 4px;
+}
+.t-head span { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.65); text-align: right; }
+.t-head span:first-child { text-align: left; color: #fff; }
+.t-row {
+  display: grid; grid-template-columns: 58px 1fr 1fr 1fr;
+  padding: 10px 14px; gap: 4px; border-top: 1px solid var(--border);
+}
+.t-row span { font-size: 12px; color: var(--text); text-align: right; }
+.t-row span:first-child { font-weight: 700; color: var(--bleu); text-align: left; }
+.t-row.sel { background: #EDF1FA; }
+.t-row.sel span { color: var(--bleu); font-weight: 700; }
+.sel-bd {
+  display: inline-block; font-size: 8px; font-weight: 900;
+  background: var(--jaune); color: var(--bleu);
+  border-radius: 3px; padding: 1px 4px;
+  vertical-align: middle; margin-left: 3px;
+}
+
+.alrt { background: #FFF9E0; border: 1px solid var(--jaune); border-radius: var(--rs); padding: 10px 14px; font-size: 12px; color: #5a4400; line-height: 1.5; }
+.err  { background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: var(--rs); padding: 12px 14px; font-size: 13px; color: #991B1B; }
+
+.mention { font-size: 10px; color: var(--hint); text-align: center; line-height: 1.6; padding: 4px 8px; }
+
+.btn-pdf {
+  width: 100%; padding: 13px;
+  background: var(--card); border: 2px solid var(--bleu);
+  color: var(--bleu); font-size: 14px; font-weight: 700;
+  font-family: 'Source Sans 3', sans-serif;
+  border-radius: var(--r); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  -webkit-appearance: none; transition: background .15s;
+}
+.btn-pdf:active { background: #EDF1FA; }
+
+.bot { height: calc(var(--safe-bot) + 24px); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hd">
+  <div>
+    <div class="hd-title">LCL</div>
+    <div class="hd-sub">Simulation crédit</div>
+  </div>
+  <div class="badge" id="badge">Particulier</div>
+</div>
+
+<!-- MODE -->
+<div class="mode-wrap">
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('simple')">Mode simple</button>
+    <button class="mode-btn" onclick="setMode('avance')">Mode avancé</button>
+  </div>
+</div>
+
+<!-- PROFIL -->
+<div class="sec">
+  <div class="card">
+    <div class="sec-label">Profil</div>
+    <div class="field">
+      <label>Type de projet</label>
+      <div class="sw">
+        <select id="profil" onchange="updateProfil()">
+          <option value="rp">Résidence principale</option>
+          <option value="invest">Investissement locatif</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVENUS -->
+<div class="sec">
+  <div class="card">
+    <div class="sec-label">Revenus</div>
+    <div class="field">
+      <label>Salaire net mensuel</label>
+      <div class="iw"><input type="number" id="salaire" placeholder="3 500" inputmode="numeric" min="0"><span class="unit">€/mois</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="field">
+      <label>Revenu conjoint (optionnel)</label>
+      <div class="iw"><input type="number" id="conjoint" placeholder="0" inputmode="numeric" min="0"><span class="unit">€/mois</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="field">
+      <label>Revenus locatifs existants</label>
+      <div class="iw"><input type="number" id="loc-exist" placeholder="0" inputmode="numeric" min="0"><span class="unit">€/mois</span></div>
+      <span class="hint">Pris en compte à 100%</span>
+    </div>
+    <div id="loc-avenir-wrap" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+      <div class="divider"></div>
+      <div class="field">
+        <label>Loyers du bien à financer</label>
+        <div class="iw"><input type="number" id="loc-avenir" placeholder="800" inputmode="numeric" min="0"><span class="unit">€/mois</span></div>
+        <span class="hint">Pondérés à 70% (règle bancaire)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHARGES -->
+<div class="sec">
+  <div class="card">
+    <div class="sec-label">Charges en cours</div>
+    <div class="field">
+      <label>Crédits en cours (mensualités totales)</label>
+      <div class="iw"><input type="number" id="charges" placeholder="0" inputmode="numeric" min="0"><span class="unit">€/mois</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PARAMÈTRES -->
+<div class="sec">
+  <div class="card">
+    <div class="sec-label">Paramètres du prêt</div>
+
+    <div class="field">
+      <label>Durée du prêt</label>
+      <div class="sl-row">
+        <input type="range" id="duree" min="10" max="25" value="20" step="1" oninput="document.getElementById('duree-val').textContent=this.value+' ans'">
+        <span class="sl-val" id="duree-val">20 ans</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label>Taux d'intérêt annuel</label>
+      <div class="sl-row">
+        <input type="range" id="taux-int" min="2" max="6" value="3.5" step="0.05" oninput="document.getElementById('taux-int-val').textContent=parseFloat(this.value).toFixed(2)+'%'">
+        <span class="sl-val" id="taux-int-val">3.50%</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <div class="tog-row">
+        <span class="tog-lbl">Assurance emprunteur</span>
+        <div class="tog" id="tog-ass" onclick="toggleAss()"></div>
+      </div>
+      <div id="ass-wrap" class="hidden" style="margin-top:10px">
+        <div class="sl-row">
+          <input type="range" id="taux-ass" min="0.10" max="0.50" value="0.25" step="0.01" oninput="document.getElementById('taux-ass-val').textContent=parseFloat(this.value).toFixed(2)+'%'">
+          <span class="sl-val" id="taux-ass-val">0.25%</span>
+        </div>
+        <span class="hint" style="margin-top:4px">Taux annuel sur capital emprunté</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label>Apport personnel</label>
+      <div class="iw"><input type="number" id="apport" placeholder="30 000" inputmode="numeric" min="0"><span class="unit">€</span></div>
+    </div>
+
+    <div id="avance-block" class="hidden">
+      <div class="divider"></div>
+      <div class="field">
+        <label>Taux d'endettement cible</label>
+        <div class="sl-row">
+          <input type="range" id="taux-endett" min="30" max="40" value="35" step="1" oninput="document.getElementById('taux-endett-val').textContent=this.value+'%'">
+          <span class="sl-val" id="taux-endett-val">35%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cta">
+  <button class="btn-calc" onclick="calculer()">Calculer ma capacité d'emprunt</button>
+</div>
+
+<!-- RÉSULTATS -->
+<div id="res-zone" class="hidden">
+  <div class="res">
+
+    <div class="hero">
+      <div class="hero-lbl">Capacité d'emprunt</div>
+      <div class="hero-val" id="r-montant">—</div>
+      <div class="hero-prix" id="r-prix"></div>
+      <div class="hero-sub" id="r-sub"></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-lbl">Mensualité max</div>
+        <div class="kpi-val" id="r-mens">—</div>
+        <div class="kpi-sub" id="r-mens-sub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Revenus retenus</div>
+        <div class="kpi-val" id="r-rev">—</div>
+        <div class="kpi-sub" id="r-rev-sub">—</div>
+      </div>
+    </div>
+
+    <div class="bk" id="bk-card" style="display:none">
+      <div class="bk-title">Détail des revenus</div>
+      <div id="bk-lines"></div>
+    </div>
+
+    <div id="alerts" style="display:flex;flex-direction:column;gap:8px"></div>
+
+    <div class="tableau">
+      <div class="t-head">
+        <span>Durée</span><span>Emprunt</span><span>Mensualité</span><span>Coût total</span>
+      </div>
+      <div id="t-rows"></div>
+    </div>
+
+    <div class="mention" id="mention"></div>
+
+    <button class="btn-pdf" onclick="exportPDF()">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+        <path d="M10 3v10M6.5 9.5L10 13l3.5-3.5M4 15h12" stroke="#003189" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Exporter en PDF
+    </button>
+
+  </div>
+</div>
+
+<div class="bot"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+var POND = 0.70;
+var mode = 'simple';
+var assOn = false;
+var lastR = null;
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(function(b, i) {
+    b.classList.toggle('active', (i===0&&m==='simple')||(i===1&&m==='avance'));
+  });
+  document.getElementById('avance-block').classList.toggle('hidden', m !== 'avance');
+}
+
+function updateProfil() {
+  var p = document.getElementById('profil').value;
+  document.getElementById('badge').textContent = p === 'invest' ? 'Investisseur' : 'Particulier';
+  var wrap = document.getElementById('loc-avenir-wrap');
+  if (p === 'invest') {
+    wrap.classList.remove('hidden');
+    wrap.style.display = 'flex';
+  } else {
+    wrap.classList.add('hidden');
+    wrap.style.display = 'none';
+  }
+}
+
+function toggleAss() {
+  assOn = !assOn;
+  document.getElementById('tog-ass').classList.toggle('on', assOn);
+  document.getElementById('ass-wrap').classList.toggle('hidden', !assOn);
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('fr-FR') + ' €'; }
+function fmtM(n) { return fmt(n) + '/mois'; }
+
+function calcMontant(mens, tx, duree) {
+  var r = tx / 100 / 12, n = duree * 12;
+  if (r === 0) return mens * n;
+  return mens * (1 - Math.pow(1+r, -n)) / r;
+}
+
+function calcMens(cap, tx, duree) {
+  var r = tx / 100 / 12, n = duree * 12;
+  if (r === 0) return cap / n;
+  return cap * r / (1 - Math.pow(1+r, -n));
+}
+
+function getMontant(mensMax, tauxInt, tauxAss, duree) {
+  if (!assOn || tauxAss === 0) return calcMontant(mensMax, tauxInt, duree);
+  var cap = calcMontant(mensMax, tauxInt, duree);
+  for (var i = 0; i < 6; i++) {
+    var aM = cap * tauxAss / 12;
+    var mCI = mensMax - aM;
+    if (mCI <= 0) return 0;
+    cap = calcMontant(mCI, tauxInt, duree);
+  }
+  return cap;
+}
+
+function calculer() {
+  var profil   = document.getElementById('profil').value;
+  var salaire  = parseFloat(document.getElementById('salaire').value)   || 0;
+  var conjoint = parseFloat(document.getElementById('conjoint').value)  || 0;
+  var locExist = parseFloat(document.getElementById('loc-exist').value) || 0;
+  var locAv    = profil === 'invest' ? (parseFloat(document.getElementById('loc-avenir').value) || 0) : 0;
+  var charges  = parseFloat(document.getElementById('charges').value)   || 0;
+  var duree    = parseInt(document.getElementById('duree').value);
+  var tauxInt  = parseFloat(document.getElementById('taux-int').value);
+  var apport   = parseFloat(document.getElementById('apport').value)    || 0;
+  var tauxEnd  = mode === 'avance' ? parseInt(document.getElementById('taux-endett').value) / 100 : 0.35;
+  var tauxAss  = assOn ? parseFloat(document.getElementById('taux-ass').value) / 100 : 0;
+
+  var locAvPond = locAv * POND;
+  var revTotal  = salaire + conjoint + locExist + locAvPond;
+
+  if (revTotal <= 0) { alert('Merci de saisir au moins un revenu.'); return; }
+
+  var mensMax = revTotal * tauxEnd - charges;
+  var rz = document.getElementById('res-zone');
+  rz.classList.remove('hidden');
+
+  if (mensMax <= 0) {
+    document.getElementById('alerts').innerHTML = '<div class="err">Les charges actuelles dépassent la capacité d\'endettement. Aucun financement possible dans ces conditions.</div>';
+    document.getElementById('r-montant').textContent = '—';
+    document.getElementById('t-rows').innerHTML = '';
+    rz.scrollIntoView({behavior:'smooth'}); return;
+  }
+
+  var montant  = getMontant(mensMax, tauxInt, tauxAss, duree);
+  var prixBien = montant + apport;
+  var reste    = revTotal - mensMax - charges;
+
+  lastR = { profil, salaire, conjoint, locExist, locAv, locAvPond, revTotal, charges, mensMax, duree, tauxInt, tauxAss, apport, montant, prixBien, tauxEnd };
+
+  document.getElementById('r-montant').textContent  = fmt(montant);
+  document.getElementById('r-prix').textContent     = apport > 0 ? 'Prix du bien avec apport : ' + fmt(prixBien) : '';
+  document.getElementById('r-sub').textContent      = duree + ' ans · ' + tauxInt.toFixed(2) + '%' + (assOn ? ' + ' + tauxAss.toFixed(2) + '% ass.' : '');
+  document.getElementById('r-mens').textContent     = fmtM(mensMax);
+  document.getElementById('r-mens-sub').textContent = assOn ? 'assurance incluse' : 'hors assurance';
+  document.getElementById('r-rev').textContent      = fmtM(revTotal);
+  document.getElementById('r-rev-sub').textContent  = 'reste à vivre : ' + fmtM(reste);
+
+  // Breakdown
+  var bkCard = document.getElementById('bk-card');
+  var lines = [];
+  if ((salaire + conjoint) > 0) lines.push(['Salaires', fmtM(salaire + conjoint)]);
+  if (locExist > 0)              lines.push(['Loyers existants (100%)', fmtM(locExist)]);
+  if (locAv > 0)                 lines.push(['Loyers à venir (70%)', fmtM(locAvPond)]);
+  if (lines.length > 1) {
+    document.getElementById('bk-lines').innerHTML =
+      lines.map(function(l) { return '<div class="bk-line"><span>' + l[0] + '</span><span>' + l[1] + '</span></div>'; }).join('') +
+      '<div class="bk-line tot"><span>Total retenu</span><span>' + fmtM(revTotal) + '</span></div>';
+    bkCard.style.display = 'block';
+  } else { bkCard.style.display = 'none'; }
+
+  // Tableau
+  var durees = [15, 20, 25];
+  if (durees.indexOf(duree) === -1) durees.push(duree);
+  durees = durees.filter(function(d) { return d >= 10 && d <= 25; }).sort(function(a,b) { return a-b; });
+
+  var rows = '';
+  durees.forEach(function(d) {
+    var rev_d  = salaire + conjoint + locExist + (locAv * POND);
+    var mens_d = rev_d * tauxEnd - charges;
+    var cap_d  = mens_d > 0 ? getMontant(mens_d, tauxInt, tauxAss, d) : 0;
+    var mr     = cap_d > 0 ? calcMens(cap_d, tauxInt, d) : 0;
+    var cout   = mr * d * 12 - cap_d;
+    var sel    = d === duree;
+    rows += '<div class="t-row' + (sel ? ' sel' : '') + '">' +
+      '<span>' + d + ' ans' + (sel ? '<span class="sel-bd">✓</span>' : '') + '</span>' +
+      '<span>' + (cap_d > 0 ? fmt(cap_d) : '—') + '</span>' +
+      '<span>' + (mens_d > 0 ? fmtM(mens_d) : '—') + '</span>' +
+      '<span>' + (cap_d > 0 ? fmt(cout) : '—') + '</span>' +
+      '</div>';
+  });
+  document.getElementById('t-rows').innerHTML = rows;
+
+  var alertsHtml = [];
+  if (profil === 'invest' && locAv > 0) alertsHtml.push('<div class="alrt">Loyers à venir pondérés à 70% selon les règles bancaires en vigueur.</div>');
+  if (assOn) alertsHtml.push('<div class="alrt">Assurance emprunteur à ' + tauxAss.toFixed(2) + '% intégrée dans le calcul.</div>');
+  document.getElementById('alerts').innerHTML = alertsHtml.join('');
+
+  document.getElementById('mention').textContent = 'Simulation indicative non contractuelle — HCSF ' + Math.round(tauxEnd * 100) + '% charges incluses. Toute décision de crédit est soumise à l\'accord de la banque.';
+  rz.scrollIntoView({behavior:'smooth'});
+}
+
+function exportPDF() {
+  if (!lastR) { alert('Lancez d\'abord une simulation.'); return; }
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  var r = lastR;
+  var bleu=[0,49,137], jaune=[255,213,0], gris=[92,102,122], blanc=[255,255,255], texte=[13,27,54];
+  var now = new Date();
+
+  // En-tête
+  doc.setFillColor(bleu[0], bleu[1], bleu[2]);
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(255,255,255);
+  doc.text('LCL', 14, 14);
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(jaune[0],jaune[1],jaune[2]);
+  doc.text('Simulation de capacité d\'emprunt', 26, 14);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(180,200,225);
+  doc.text('Éditée le ' + now.toLocaleDateString('fr-FR') + ' à ' + now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), 26, 22);
+
+  var y = 40;
+
+  // Héros
+  doc.setFillColor(237, 241, 250);
+  doc.roundedRect(14, y, 182, 26, 3, 3, 'F');
+  doc.setDrawColor(bleu[0],bleu[1],bleu[2]); doc.setLineWidth(0.4);
+  doc.roundedRect(14, y, 182, 26, 3, 3, 'S');
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(gris[0],gris[1],gris[2]);
+  doc.text('CAPACITÉ D\'EMPRUNT', 105, y+8, {align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(bleu[0],bleu[1],bleu[2]);
+  doc.text(Math.round(r.montant).toLocaleString('fr-FR') + ' €', 105, y+18, {align:'center'});
+  if (r.apport > 0) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(gris[0],gris[1],gris[2]);
+    doc.text('Prix du bien avec apport : ' + Math.round(r.prixBien).toLocaleString('fr-FR') + ' €', 105, y+24, {align:'center'});
+  }
+  y += 33;
+
+  function section(t) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(bleu[0],bleu[1],bleu[2]);
+    doc.text(t, 14, y); y += 4;
+    doc.setFillColor(bleu[0],bleu[1],bleu[2]); doc.rect(14, y, 182, 0.5, 'F'); y += 5;
+  }
+
+  function rowPDF(label, val, i) {
+    if (i % 2 === 0) { doc.setFillColor(248,250,253); doc.rect(14, y-1, 182, 7, 'F'); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.setTextColor(gris[0],gris[1],gris[2]); doc.text(label, 18, y+4);
+    doc.setTextColor(texte[0],texte[1],texte[2]); doc.text(val, 193, y+4, {align:'right'});
+    y += 7;
+  }
+
+  section('Paramètres');
+  var params = [
+    ['Profil', r.profil==='invest'?'Investisseur locatif':'Particulier — résidence principale'],
+    ['Durée', r.duree + ' ans'],
+    ['Taux d\'intérêt', r.tauxInt.toFixed(2) + '%'],
+    ['Assurance emprunteur', r.tauxAss > 0 ? r.tauxAss.toFixed(2) + '% annuel' : 'Non incluse'],
+    ['Taux d\'endettement', Math.round(r.tauxEnd * 100) + '%'],
+    ['Apport', Math.round(r.apport).toLocaleString('fr-FR') + ' €'],
+  ];
+  params.forEach(function(p,i) { rowPDF(p[0], p[1], i); });
+  y += 4;
+
+  section('Revenus retenus');
+  var ri = 0;
+  if ((r.salaire+r.conjoint) > 0) rowPDF('Salaires', Math.round(r.salaire+r.conjoint).toLocaleString('fr-FR')+' €/mois (100%)', ri++);
+  if (r.locExist > 0)              rowPDF('Loyers existants', Math.round(r.locExist).toLocaleString('fr-FR')+' €/mois (100%)', ri++);
+  if (r.locAv > 0)                 rowPDF('Loyers à venir (70%)', Math.round(r.locAvPond).toLocaleString('fr-FR')+' €/mois retenus', ri++);
+  rowPDF('Total revenus retenus', Math.round(r.revTotal).toLocaleString('fr-FR')+' €/mois', ri++);
+  rowPDF('Charges mensuelles', Math.round(r.charges).toLocaleString('fr-FR')+' €/mois', ri++);
+  rowPDF('Mensualité disponible', Math.round(r.mensMax).toLocaleString('fr-FR')+' €/mois', ri++);
+  y += 4;
+
+  section('Comparatif par durée');
+  doc.setFillColor(bleu[0],bleu[1],bleu[2]); doc.rect(14, y, 182, 8, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(blanc[0],blanc[1],blanc[2]);
+  doc.text('Durée', 18, y+5.5);
+  doc.text('Emprunt', 80, y+5.5, {align:'right'});
+  doc.text('Mensualité', 135, y+5.5, {align:'right'});
+  doc.text('Coût total', 193, y+5.5, {align:'right'});
+  y += 9;
+
+  var durees = [15,20,25];
+  if (durees.indexOf(r.duree) === -1) durees.push(r.duree);
+  durees = durees.filter(function(d){ return d>=10&&d<=25; }).sort(function(a,b){return a-b;});
+
+  durees.forEach(function(d, i) {
+    var rev_d  = r.salaire + r.conjoint + r.locExist + (r.locAv * POND);
+    var mens_d = rev_d * r.tauxEnd - r.charges;
+    var cap_d  = mens_d > 0 ? getMontant(mens_d, r.tauxInt, r.tauxAss, d) : 0;
+    var mr     = cap_d > 0 ? calcMens(cap_d, r.tauxInt, d) : 0;
+    var cout   = mr * d * 12 - cap_d;
+    var sel    = d === r.duree;
+    if (sel)         { doc.setFillColor(237,241,250); }
+    else if (i%2===0){ doc.setFillColor(248,250,253); }
+    else             { doc.setFillColor(255,255,255); }
+    doc.rect(14, y-1, 182, 8, 'F');
+    if (sel) { doc.setFont('helvetica','bold'); doc.setTextColor(bleu[0],bleu[1],bleu[2]); }
+    else     { doc.setFont('helvetica','normal'); doc.setTextColor(texte[0],texte[1],texte[2]); }
+    doc.text(d + ' ans' + (sel?' ◀':''), 18, y+5);
+    doc.setTextColor(texte[0],texte[1],texte[2]); doc.setFont('helvetica', sel?'bold':'normal');
+    doc.text(cap_d>0 ? Math.round(cap_d).toLocaleString('fr-FR')+' €' : '—', 80, y+5, {align:'right'});
+    doc.text(mens_d>0 ? Math.round(mens_d).toLocaleString('fr-FR')+' €/mois' : '—', 135, y+5, {align:'right'});
+    doc.text(cap_d>0 ? Math.round(cout).toLocaleString('fr-FR')+' €' : '—', 193, y+5, {align:'right'});
+    y += 8;
+  });
+
+  // Pied de page
+  doc.setFillColor(bleu[0],bleu[1],bleu[2]); doc.rect(0, 281, 210, 16, 'F');
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(170,190,215);
+  doc.text('Simulation indicative non contractuelle — LCL Le Crédit Lyonnais — Toute décision de crédit est soumise à l\'accord de la banque.', 105, 288, {align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(jaune[0],jaune[1],jaune[2]);
+  doc.text('LCL — Le Crédit Lyonnais', 105, 294, {align:'center'});
+
+  doc.save('LCL_Capacite_Emprunt_' + now.toISOString().slice(0,10) + '.pdf');
+}
+
+updateProfil();
+</script>
+</body>
+</html>
